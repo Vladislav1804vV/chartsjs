@@ -1,0 +1,32 @@
+#!/usr/bin/env node
+
+const app = require('../api')
+const config = require('config')
+
+const PORT = process.env.PORT || config.get('port')
+
+// app.all('*', (req, res, next) => {
+//   if (req.path.substr(-1) === '/' && req.path.length > 1) {
+//     const newPath = req.path.slice(0, -1);
+//     res.redirect(308, newPath);
+//   } else {
+//     next();
+//   }
+// })
+
+// app.all('/api', (req, res, next) => {
+//   res.setHeader('Content-Type', 'text/html');
+//   res.setHeader('Cache-Control', 's-max-age=1, stale-while-revalidate');
+//   next()
+// });
+
+;(async () => {
+  try {
+    app.listen(PORT, () => {
+      console.log(`Server has been started on port ${PORT}...`)
+    })
+  } catch (e) {
+    console.log(e)
+    process.exit(1)
+  }
+})()
