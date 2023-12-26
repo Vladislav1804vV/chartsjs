@@ -10,8 +10,8 @@ class ChartService {
         }
 
         const options = Object.assign(data, {
-            width: 400,
-            height: 400
+            width: data.width || 400,
+            height: data.height || 400
         })
 
         const chartJSNodeCanvas = new ChartJSNodeCanvas({
@@ -27,12 +27,63 @@ class ChartService {
 
         Chart.register(ChartDataLabels);
 
-        const base64 = await chartJSNodeCanvas.renderToDataURL(configuration)
-
-        return base64
+        return chartJSNodeCanvas.renderToDataURL(configuration)
     }
 
     getConfiguration(options) {
+
+        switch (options.kind) {
+            case 'line_chart':
+                return this.getLineChartConfig(options)
+            case 'pie_chart':
+                return this.getPieChartConfig(options)
+            default:
+                throw ApiError.BadRequest('Вид не удалось определить')
+        }
+    }
+
+    getLineChartConfig(options) {
+
+        if (!options.names) {
+            throw ApiError.BadRequest('Названия не удалось определить')
+        }
+
+        if (!options.colors) {
+            throw ApiError.BadRequest('Цвета не удалось определить')
+        }
+
+        if (!options.x_items) {
+            throw ApiError.BadRequest('X-элементы не удалось определить')
+        }
+
+        if (!options.y_items) {
+            throw ApiError.BadRequest('Y-элементы не удалось определить')
+        }
+
+        return {
+            type: 'line',
+            data: {
+                labels: options.x_items,
+                datasets: options.names.map((name, index) => ({
+                    label: name,
+                    data: options.y_items[index],
+                    backgroundColor: options.colors[index],
+                    borderColor: options.colors[index],
+                }))
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                }
+            }
+        }
+    }
+
+    getPieChartConfig(options) {
+
         if (!options.values) {
             throw ApiError.BadRequest('Значения не удалось определить')
         }
